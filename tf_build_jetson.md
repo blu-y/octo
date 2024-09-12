@@ -1,8 +1,8 @@
-### Jetson Orin Nano에서 TF 2.16 빌드
-
+## Jetson Orin Nano에서 TF, TF_text 2.16 빌드
+### tensorflow
 #### 0. Env
 Jetson Orin Nano  
-Jetpack 6.0  
+Jetpack 6.0 (L4T R36.3.0)  
 Ubuntu 22.04  
 python3.10  
 
@@ -10,7 +10,7 @@ python3.10
 apt로 설치가 안되므로 제공하는 sh 파일 사용  
 제공된 CURRENT_LLVM_STABLE로 자동 설치되는 것을 확인  
 17을 CURRENT_LLVM_STABLE로 지정  
-```
+```bash
 wget https://apt.llvm.org/llvm.sh
 vim ~/llvm.sh +%s/CURRENT_LLVM_STABLE=18/CURRENT_LLVM_STABLE=17 +wq
 sudo bash ./llvm.sh
@@ -18,7 +18,7 @@ sudo bash ./llvm.sh
 
 #### 2. PATH, LD_LIBRARY_PATH 지정
 ~/.bashrc에 추가 후 source
-```
+```bash
 echo "export PATH=/usr/local/cuda-12.2/bin:$PATH" >> ~/.bashrc
 echo "export LD_LIBRARY_PATH=/usr/local/cuda-12.2/lib64:$LD_LIBRARY_PATH" >> ~/.bashrc
 echo "export PATH=/home/jet/.local/bin:$PATH" >> ~/.bashrc
@@ -30,7 +30,7 @@ echo "export TF_PYTHON_VERSION=3.10" >> ~/.bashrc
 source ~/.bashrc
 ```
 clang 확인
-```
+```bash
 clang --version
 ```
 ```
@@ -41,14 +41,15 @@ InstalledDir: /usr/lib/llvm-17/bin
 ```
 
 #### 3. TF는 r2.16 branch 사용
-```
-# git clone https://github.com/tensorflow/tensorflow.git
+```bash
+git clone https://github.com/tensorflow/tensorflow.git
+cd tensorflow
 git stash
 git checkout r2.16
 ```
 
 #### 4. configure 파일
-```
+```bash
 ./configure
 ```
 configure 내용 (빈칸은 default)
@@ -147,8 +148,8 @@ Configuration finished
 ```
 </details>
 
-#### 5. 빌드(14시간 소요)
-```
+#### 5. 빌드(14h 소요)
+```bash
 bazel build //tensorflow/tools/pip_package:build_pip_package --repo_env=WHEEL_NAME=tensorflow --config=cuda --verbose_failures --copt=-Wno-unused-command-line-argument
 ```
 
@@ -191,18 +192,18 @@ INFO: Build completed successfully, 25422 total actions
 </details>
 
 #### 6. wheel 생성
-```
+```bash
 # sudo apt-get install patchelf # patchelf: command not found 오류 발생 시
 bazel-bin/tensorflow/tools/pip_package/build_pip_package .
 ```
-위 명령실행 시 현재 디렉토리에 tensorflow-2.16.2-cp310-cp310-linux_aarch64.whl 같은 whl 파일이 생성됨
+위 명령실행 시 현재 디렉토리에 `tensorflow-2.16.2-cp310-cp310-linux_aarch64.whl` 같은 whl 파일이 생성됨
 
 #### 7. 설치
-```
+```bash
 pip install tensorflow-2.16.2-cp310-cp310-linux_aarch64.whl
 ```
 설치 확인 
-```
+```bash
 cd # source 파일 내부 실행 시 오류 방지
 python -c "import tensorflow as tf; print(\"Num GPUs Available: \", len(tf.config.list_physical_devices('GPU')))"
 ```
@@ -211,12 +212,39 @@ python -c "import tensorflow as tf; print(\"Num GPUs Available: \", len(tf.confi
 2024-09-12 13:29:51.470081: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:479] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
 2024-09-12 13:29:51.500908: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:10575] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
 2024-09-12 13:29:51.515039: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1442] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
-2024-09-12 13:29:55.592109: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:00:00.0/numa_node
-Your kernel may have been built without NUMA support.
-2024-09-12 13:29:55.639399: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:00:00.0/numa_node
-Your kernel may have been built without NUMA support.
-2024-09-12 13:29:55.639685: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:00:00.0/numa_node
-Your kernel may have been built without NUMA support.
 Num GPUs Available:  1
 ```
-몇가지 경고가 뜨지만 일단 GPU 인식 확인
+already registered 경고가 뜨지만 GPU 인식 확인
+
+### tensorflow_text
+#### 1. TF_text는 2.16 branch 사용
+```bash
+git clone https://github.com/tensorflow/text.git
+cd text
+git checkout 2.16
+```
+
+#### 2. 빌드(11m 소요)
+tensorflow를 직접 빌드했어어야 오류없이 빌드됨
+```bash
+./oss_scripts/run_build.sh
+```
+빌드가 완료되면 `tensorflow_text-2.16.1-cp310-cp310-linux_aarch64.whl` 같은 whl 파일이 생성됨
+
+#### 3. 설치
+```bash
+pip install ./tensorflow_text-2.16.1-cp310-cp310-linux_aarch64.whl
+```
+설치 확인
+```bash
+cd # source 파일 내부 실행 시 오류 방지
+python -c "import tensorflow_text as tf_text; print(\"tf_text version: \", tf_text.__version__)"
+```
+실행 결과
+```
+2024-09-12 17:31:30.162578: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:479] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-09-12 17:31:30.191621: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:10575] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-09-12 17:31:30.205206: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1442] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+tf_text version:  2.16.2
+```
+마찬가지로 already registered 경고가 뜨지만 설치 확인
