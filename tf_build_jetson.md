@@ -151,3 +151,72 @@ Configuration finished
 ```
 bazel build //tensorflow/tools/pip_package:build_pip_package --repo_env=WHEEL_NAME=tensorflow --config=cuda --verbose_failures --copt=-Wno-unused-command-line-argument
 ```
+
+<details>
+<summary>상세 내용</summary>
+
+```
+WARNING: The following configs were expanded more than once: [tensorrt, cuda_clang, cuda]. For repeatable flags, repeats are counted twice and may lead to unexpected behavior.
+INFO: Reading 'startup' options from /home/jet/tensorflow/.bazelrc: --windows_enable_symlinks
+INFO: Options provided by the client:
+  Inherited 'common' options: --isatty=1 --terminal_columns=278
+INFO: Reading rc options for 'build' from /home/jet/tensorflow/.bazelrc:
+  Inherited 'common' options: --experimental_repo_remote_exec
+INFO: Reading rc options for 'build' from /home/jet/tensorflow/.bazelrc:
+  'build' options: --define framework_shared_object=true --define tsl_protobuf_header_only=true --define=use_fast_cpp_protos=true --define=allow_oversize_protos=true --spawn_strategy=standalone -c opt --announce_rc --define=grpc_no_ares=true --noincompatible_remove_legacy_whole_archive --features=-force_no_whole_archive --enable_platform_specific_config --define=with_xla_support=true --config=short_logs --config=v2 --define=no_aws_support=true --define=no_hdfs_support=true --experimental_cc_shared_library --experimental_link_static_libraries_once=false --incompatible_enforce_config_setting_visibility
+INFO: Reading rc options for 'build' from /home/jet/tensorflow/.tf_configure.bazelrc:
+  'build' options: --action_env PYTHON_BIN_PATH=/usr/bin/python3 --action_env PYTHON_LIB_PATH=/usr/lib/python3.10/dist-packages --python_path=/usr/bin/python3 --config=tensorrt --action_env CUDA_TOOLKIT_PATH=/usr/local/cuda-12.2 --action_env TF_CUDA_COMPUTE_CAPABILITIES=compute_87 --action_env LD_LIBRARY_PATH=/usr/lib/llvm-17/lib:/usr/local/cuda-12.2/lib64:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib:/usr/local/cuda/extras/CUPTI/lib64 --config=cuda_clang --action_env CLANG_CUDA_COMPILER_PATH=/usr/lib/llvm-17/bin/clang --copt=-Wno-gnu-offsetof-extensions --config=cuda_clang
+INFO: Found applicable config definition build:short_logs in file /home/jet/tensorflow/.bazelrc: --output_filter=DONT_MATCH_ANYTHING
+INFO: Found applicable config definition build:v2 in file /home/jet/tensorflow/.bazelrc: --define=tf_api_version=2 --action_env=TF2_BEHAVIOR=1
+INFO: Found applicable config definition build:tensorrt in file /home/jet/tensorflow/.bazelrc: --repo_env TF_NEED_TENSORRT=1
+INFO: Found applicable config definition build:cuda_clang in file /home/jet/tensorflow/.bazelrc: --config=cuda --config=tensorrt --action_env=TF_CUDA_CLANG=1 --@local_config_cuda//:cuda_compiler=clang --repo_env=TF_CUDA_COMPUTE_CAPABILITIES=sm_50,sm_60,sm_70,sm_80,compute_90
+INFO: Found applicable config definition build:cuda in file /home/jet/tensorflow/.bazelrc: --repo_env TF_NEED_CUDA=1 --crosstool_top=@local_config_cuda//crosstool:toolchain --@local_config_cuda//:enable_cuda
+INFO: Found applicable config definition build:tensorrt in file /home/jet/tensorflow/.bazelrc: --repo_env TF_NEED_TENSORRT=1
+INFO: Found applicable config definition build:cuda_clang in file /home/jet/tensorflow/.bazelrc: --config=cuda --config=tensorrt --action_env=TF_CUDA_CLANG=1 --@local_config_cuda//:cuda_compiler=clang --repo_env=TF_CUDA_COMPUTE_CAPABILITIES=sm_50,sm_60,sm_70,sm_80,compute_90
+INFO: Found applicable config definition build:cuda in file /home/jet/tensorflow/.bazelrc: --repo_env TF_NEED_CUDA=1 --crosstool_top=@local_config_cuda//crosstool:toolchain --@local_config_cuda//:enable_cuda
+INFO: Found applicable config definition build:tensorrt in file /home/jet/tensorflow/.bazelrc: --repo_env TF_NEED_TENSORRT=1
+INFO: Found applicable config definition build:cuda in file /home/jet/tensorflow/.bazelrc: --repo_env TF_NEED_CUDA=1 --crosstool_top=@local_config_cuda//crosstool:toolchain --@local_config_cuda//:enable_cuda
+INFO: Found applicable config definition build:linux in file /home/jet/tensorflow/.bazelrc: --host_copt=-w --copt=-Wno-all --copt=-Wno-extra --copt=-Wno-deprecated --copt=-Wno-deprecated-declarations --copt=-Wno-ignored-attributes --copt=-Wno-array-bounds --copt=-Wunused-result --copt=-Werror=unused-result --copt=-Wswitch --copt=-Werror=switch --copt=-Wno-error=unused-but-set-variable --define=PREFIX=/usr --define=LIBDIR=$(PREFIX)/lib --define=INCLUDEDIR=$(PREFIX)/include --define=PROTOBUF_INCLUDE_PATH=$(PREFIX)/include --cxxopt=-std=c++17 --host_cxxopt=-std=c++17 --config=dynamic_kernels --experimental_guard_against_concurrent_changes
+INFO: Found applicable config definition build:dynamic_kernels in file /home/jet/tensorflow/.bazelrc: --define=dynamic_loaded_kernels=true --copt=-DAUTOLOAD_DYNAMIC_KERNELS
+WARNING: The following configs were expanded more than once: [tensorrt, cuda_clang, cuda]. For repeatable flags, repeats are counted twice and may lead to unexpected behavior.
+INFO: Build options --@local_config_cuda//:cuda_compiler, --action_env, and --copt have changed, discarding analysis cache.
+INFO: Analyzed target //tensorflow/tools/pip_package:build_pip_package (706 packages loaded, 50676 targets configured).
+INFO: Found 1 target...
+Target //tensorflow/tools/pip_package:build_pip_package up-to-date:
+  bazel-bin/tensorflow/tools/pip_package/build_pip_package
+INFO: Elapsed time: 49591.181s, Critical Path: 2448.98s
+INFO: 25422 processes: 443 internal, 24979 local.
+INFO: Build completed successfully, 25422 total actions
+```
+</details>
+
+#### 6. wheel 생성
+```
+# sudo apt-get install patchelf # patchelf: command not found 오류 발생 시
+bazel-bin/tensorflow/tools/pip_package/build_pip_package .
+```
+위 명령실행 시 현재 디렉토리에 tensorflow-2.16.2-cp310-cp310-linux_aarch64.whl 같은 whl 파일이 생성됨
+
+#### 7. 설치
+```
+pip install tensorflow-2.16.2-cp310-cp310-linux_aarch64.whl
+```
+설치 확인 
+```
+cd # source 파일 내부 실행 시 오류 방지
+python -c "import tensorflow as tf; print(\"Num GPUs Available: \", len(tf.config.list_physical_devices('GPU')))"
+```
+실행 결과
+```
+2024-09-12 13:29:51.470081: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:479] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-09-12 13:29:51.500908: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:10575] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-09-12 13:29:51.515039: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1442] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2024-09-12 13:29:55.592109: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:00:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2024-09-12 13:29:55.639399: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:00:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2024-09-12 13:29:55.639685: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:984] could not open file to read NUMA node: /sys/bus/pci/devices/0000:00:00.0/numa_node
+Your kernel may have been built without NUMA support.
+Num GPUs Available:  1
+```
+몇가지 경고가 뜨지만 일단 GPU 인식 확인
