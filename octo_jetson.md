@@ -20,7 +20,7 @@ export XLA_PYTHON_CLIENT_ALLOCATOR=default
 export XLA_PYTHON_CLIENT_ALLOCATOR=cuda_malloc_async
 export XLA_PYTHON_CLIENT_ALLOCATOR=cuda_async
 export JAX_TRACEBACK_FILTERING=off
-export JAX_PLATFORMS=cpu
+<!-- export JAX_PLATFORMS=cpu -->
 export JAX_DEBUG_NANS=True
 export JAX_TRACEBACK_FILTERING=off
 
@@ -34,3 +34,4 @@ sudo chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn*
 cat /usr/local/cuda/include/cudnn_version.h | grep CUDNN_MAJOR -A 2
 ```
 
+sudo apt install ca-certificates
