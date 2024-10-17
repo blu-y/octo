@@ -5,6 +5,7 @@ import tqdm
 import mediapy
 import numpy as np
 from octo.model.octo_model import OctoModel
+from camera import Camera
 
 # ACTION_DIM_LABELS = ['dx', 'dy', 'dz', 'droll', 'dpitch', 'dyaw', 'grasp']
 
@@ -20,7 +21,7 @@ class TwistPublisher(Node):
         super().__init__('twist_publisher')
         self.get_logger().info("TwistPublisher node started")
         self.get_logger().info("Loading OctoModel...")
-        self.octo = OctoModel.load_pretrained("./octo-small-1.5")
+        self.octo = OctoModel.load_pretrained("./octo-base-1.5")
         self.get_logger().info("OctoModel loaded")
         self.action_pub = self.create_publisher(Twist, '/twist_controller/commands', 10)
         self.task_sub = self.create_subscription(String, '/task', self.task_cb, 1)
@@ -36,12 +37,9 @@ class TwistPublisher(Node):
         self.pause = False
         self.wrist_sub  # prevent unused variable warning
         self.br = CvBridge()
-        self.cap = cv2.VideoCapture(4)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-        self.cap.set(cv2.CAP_PROP_FPS, 30)
+        self.cap = Camera()
         self.x_lin = 5.0
-        self.x_ang = 5.0
+        self.x_ang = 20.0
         self.pred_actions = []
         self.frames = []
         self.wrist_frames = []
@@ -77,18 +75,18 @@ class TwistPublisher(Node):
         if not self.task:
             self.get_logger().info("No task received yet.")
             self.get_logger().info("\tros2 topic pub /task std_msgs/msg/String 'data: \"Pick up the block\"'")
-            # ros2 topic pub /task std_msgs/msg/String 'data: "Pick up the pepsi bottle"' -1
+            # ros2 topic pub /task std_msgs/msg/String 'data: "Pick up the box"' -1
             return
         wrist_frame = self.br.imgmsg_to_cv2(msg)
-        ret, frame = self.cap.read()
+        frame = self.cap.getFrame()
+        if isinstance(frame, int):
+            print("Error: Could not read frame.")
+            return
         wrist_frame = cv2.cvtColor(wrist_frame, cv2.COLOR_RGB2BGR)
         cv2.imshow("wrist", wrist_frame)
         cv2.imshow("camera", frame)
         cv2.waitKey(1)
         if self.pause:
-            return
-        if not ret:
-            print("Error: Could not read frame.")
             return
         self.frames.append(cv2.resize(frame, (256, 256)))
         self.wrist_frames.append(cv2.resize(wrist_frame, (128, 128)))
