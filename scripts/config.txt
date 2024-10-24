@@ -1,0 +1,6 @@
+python scripts/finetune.py \
+--config=./scripts/configs/finetune_config.py:head_only,image_conditioned \
+--config.pretrained_path=./octo-base-1.5 \
+--config.batch_size=64 \
+--config.num_steps=5000 \
+--config.save_dir=.

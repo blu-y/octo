@@ -23,6 +23,13 @@ from octo.data.utils.data_utils import (
     relabel_actions,
 )
 
+def kinova_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
+    # NOTE: this is not actually the official OXE copy of bridge, it is our own more up-to-date copy that you
+    # can find at https://rail.eecs.berkeley.edu/datasets/bridge_release/data/tfds/
+    trajectory["action"] = trajectory["action"][:, :7]
+    trajectory["observation"]["proprio"] = trajectory["observation"]["state"][:, 6:14]
+    return trajectory
+
 
 def bridge_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]:
     # NOTE: this is not actually the official OXE copy of bridge, it is our own more up-to-date copy that you
@@ -969,6 +976,7 @@ def mujoco_manip_dataset_transform(trajectory: Dict[str, Any]) -> Dict[str, Any]
 
 
 OXE_STANDARDIZATION_TRANSFORMS = {
+    "kinova_dataset": kinova_dataset_transform,
     "bridge_dataset": bridge_dataset_transform,
     "fractal20220817_data": rt1_dataset_transform,
     "kuka": kuka_dataset_transform,

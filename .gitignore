@@ -9,6 +9,11 @@ __pycache__/
 *$py.class
 # C extensions
 *.so
+*.zip
+state/
+kinova_dataset*/
+experiment_*/
+aloha_sim_dataset/
 
 # Distribution / packaging
 .Python
